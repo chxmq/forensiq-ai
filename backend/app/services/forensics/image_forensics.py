@@ -37,7 +37,7 @@ def _save_artifact(img: np.ndarray, name: str) -> str:
     settings.artifact_dir.mkdir(parents=True, exist_ok=True)
     out = settings.artifact_dir / name
     cv2.imwrite(str(out), img)
-    return f"/artifacts/{name}"
+    return f"/api/artifacts/{name}"
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -423,13 +423,9 @@ def analyze_image(path: Path, doc_id: str) -> dict[str, Any]:
     metrics: dict[str, Any] = {}
     artifacts: dict[str, str] = {}
 
-    # Noise-floor anomaly is the primary, false-positive-free tamper detector for
-    # documents; ELA contributes a visualization heatmap (and fires only on
-    # strongly-concentrated edits). Copy-move detection is available
-    # (`copy_move_detection`) for photographic evidence but is intentionally not
-    # part of the automatic document-scoring path, where repeated template
-    # elements make it unreliable.
-    for fn in (error_level_analysis, noise_floor_anomaly):
+    # ELA + noise-floor are primary tamper detectors; copy-move flags cloned
+    # seals/stamps when match confidence is high (raised threshold in config).
+    for fn in (error_level_analysis, noise_floor_anomaly, copy_move_detection):
         try:
             m, f, a = fn(path, doc_id)
             metrics.update(m)

@@ -39,6 +39,7 @@ class ApplicationStatus(str, enum.Enum):
     draft = "draft"
     analyzing = "analyzing"
     analyzed = "analyzed"
+    failed = "failed"
     auto_cleared = "auto_cleared"
     manual_review = "manual_review"
     escalated = "escalated"

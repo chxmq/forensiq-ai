@@ -1,21 +1,25 @@
 """Aggregate dashboard metrics."""
 from __future__ import annotations
 
+from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.core.auth import CurrentUser
 from app.db import models
 from app.db.database import get_db
 from app.schemas.api import DashboardStats
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
+DbSession = Annotated[Session, Depends(get_db)]
 
 S = models.ApplicationStatus
 
 
 @router.get("", response_model=DashboardStats)
-def dashboard(db: Session = Depends(get_db)) -> DashboardStats:
+def dashboard(db: DbSession, _user: CurrentUser) -> DashboardStats:
     def count(*statuses) -> int:
         return db.query(models.Application).filter(
             models.Application.status.in_(statuses)
@@ -48,7 +52,7 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardStats:
     pending = (
         db.query(models.Application)
         .filter(models.Application.risk_band.is_(None))
-        .filter(models.Application.status.in_([S.draft, S.analyzed]))
+        .filter(models.Application.status.in_([S.draft, S.analyzed, S.failed]))
         .count()
     )
 
@@ -65,6 +69,7 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardStats:
         auto_cleared=count(S.auto_cleared, S.approved),
         manual_review=count(S.manual_review),
         escalated=count(S.escalated, S.declined),
+        failed=count(S.failed),
         open_cases=db.query(models.Case).filter(
             models.Case.status.in_([models.CaseStatus.open, models.CaseStatus.investigating])
         ).count(),

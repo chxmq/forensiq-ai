@@ -46,6 +46,7 @@ export const statusLabel: Record<string, string> = {
   draft: "Draft",
   analyzing: "Analyzing",
   analyzed: "Analyzed",
+  failed: "Analysis Failed",
   auto_cleared: "Auto-Cleared",
   manual_review: "Manual Review",
   escalated: "Escalated",

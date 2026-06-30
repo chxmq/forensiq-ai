@@ -7,7 +7,10 @@ import {
   ShieldAlert,
   Search,
   Settings2,
+  LogOut,
+  User,
 } from "lucide-react";
+import { clearAuth, getUsername } from "../lib/auth";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutGrid, end: true },
@@ -20,6 +23,12 @@ const nav = [
 export default function Layout() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const username = getUsername() || "underwriter";
+
+  const onLogout = () => {
+    clearAuth();
+    navigate("/login", { replace: true });
+  };
 
   const onSearch = (e: FormEvent) => {
     e.preventDefault();
@@ -72,6 +81,14 @@ export default function Layout() {
               onChange={(e) => setQuery(e.target.value)}
             />
           </form>
+          <div className="flex items-center gap-3 text-sm text-muted">
+            <span className="hidden items-center gap-1.5 sm:flex">
+              <User className="h-4 w-4 text-faint" /> {username}
+            </span>
+            <button type="button" className="btn-secondary py-1.5 text-xs" onClick={onLogout}>
+              <LogOut className="h-3.5 w-3.5" /> Sign out
+            </button>
+          </div>
         </header>
 
         <main className="flex-1">

@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.services.common import Finding, ModuleResult, Severity
-from app.data.document_types import INCOME_DOC_TYPES
+from app.data.document_types import INCOME_DOC_TYPES, IDENTITY_DOC_TYPES
 
 COLLATERAL_TYPES = frozenset({
     "land_title", "sale_deed", "chain_document", "valuation_report",
@@ -61,6 +61,7 @@ def analyze_intake(application: dict, documents: list[dict], financial_skipped: 
     result.metrics["document_count"] = n_docs
     result.metrics["has_bank_statement"] = _has_type(documents, "bank_statement")
     result.metrics["has_income_proof"] = _has_type(documents, *INCOME_TYPES)
+    result.metrics["has_identity_proof"] = _has_type(documents, *IDENTITY_DOC_TYPES)
     result.metrics["has_collateral_doc"] = _has_type(documents, *COLLATERAL_TYPES)
     result.metrics["total_extracted_text"] = _total_text(documents)
 
@@ -97,6 +98,22 @@ def analyze_intake(application: dict, documents: list[dict], financial_skipped: 
             ),
             severity=Severity.medium,
             confidence=0.9,
+        ))
+
+    app_pan = (application.get("applicant_pan") or "").upper()
+    if app_pan and not result.metrics["has_identity_proof"] and not signals.get("pan"):
+        result.add(Finding(
+            module="intake",
+            code="MISSING_IDENTITY_PROOF",
+            title="Identity document (PAN/Aadhaar) not provided",
+            detail=(
+                "Applicant PAN was declared but no identity proof document was uploaded "
+                "and PAN could not be extracted from other files. Identity verification "
+                "requires PAN/Aadhaar documentation."
+            ),
+            severity=Severity.medium,
+            confidence=0.88,
+            evidence={"applicant_pan": app_pan},
         ))
 
     if loan_type in ("home_loan", "loan_against_property") and not result.metrics["has_collateral_doc"]:
@@ -183,7 +200,6 @@ def analyze_intake(application: dict, documents: list[dict], financial_skipped: 
             confidence=0.9,
         ))
 
-    app_pan = (application.get("applicant_pan") or "").upper()
     doc_pans = [
         (d.get("extracted_fields") or {}).get("pan", "").upper()
         for d in documents

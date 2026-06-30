@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { ShieldAlert, CheckCircle2, XCircle, UserCog, Clock } from "lucide-react";
 import { listCases, updateCase, type CaseOut } from "../lib/api";
 import { fmtDate, riskColor, riskTint, titleCase } from "../lib/format";
@@ -68,7 +69,15 @@ export default function Cases() {
                       {c.priority.toUpperCase()}
                     </span>
                   </div>
-                  <p className="mt-1.5 line-clamp-2 text-sm text-ink">{c.summary}</p>
+                  {c.applicant_name && (
+                    <p className="mt-1 text-sm font-semibold text-ink">
+                      {c.applicant_name}
+                      {c.application_reference && (
+                        <span className="ml-2 font-mono text-xs font-normal text-faint">{c.application_reference}</span>
+                      )}
+                    </p>
+                  )}
+                  <p className="mt-1 line-clamp-2 text-sm text-muted">{c.summary}</p>
                   <div className="mt-2 flex items-center justify-between text-[11px]">
                     <span className="font-semibold" style={{ color: STATUS_COLOR[c.status] }}>{titleCase(c.status)}</span>
                     <span className="flex items-center gap-1 text-faint"><Clock className="h-3 w-3" /> {fmtDate(c.created_at)}</span>
@@ -110,6 +119,14 @@ export default function Cases() {
 
                 <Block label="Risk Summary">
                   <p className="text-sm leading-relaxed text-muted">{active.summary}</p>
+                  {active.application_id && (
+                    <Link
+                      to={`/applications/${active.application_id}`}
+                      className="mt-3 inline-flex text-sm font-semibold text-brand-600 hover:underline"
+                    >
+                      Open application →
+                    </Link>
+                  )}
                 </Block>
 
                 {active.resolution_note && (

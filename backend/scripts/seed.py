@@ -9,6 +9,7 @@ Run:  backend/.venv/bin/python -m scripts.seed
 from __future__ import annotations
 
 import asyncio
+import os
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -93,11 +94,22 @@ def reset_db() -> None:
 
 
 async def main() -> None:
+    reset = os.getenv("FORENSIQ_SEED_RESET", "false").lower() in ("1", "true", "yes")
     print("• Generating sample documents...")
     samples = generate_samples.generate_all()
 
-    print("• Resetting database...")
-    reset_db()
+    if reset:
+        print("• Resetting database (FORENSIQ_SEED_RESET=true)...")
+        reset_db()
+    else:
+        db_check = SessionLocal()
+        try:
+            if db_check.query(models.Application).count() > 0:
+                print("• Database already has applications — skipping seed.")
+                return
+        finally:
+            db_check.close()
+        init_db()
 
     db = SessionLocal()
     created: list[str] = []

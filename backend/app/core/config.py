@@ -29,14 +29,24 @@ class Settings(BaseSettings):
     artifact_dir: Path = BACKEND_DIR / "storage" / "artifacts"
     data_dir: Path = BASE_DIR / "data"
 
-    # ── Database ────────────────────────────────────────────────
-    database_url: str = f"sqlite:///{BACKEND_DIR / 'forensiq.db'}"
+    # ── Database (stored under storage/ so persistent disks keep data) ─
+    database_url: str = ""
 
     # ── Frontend (production: FastAPI serves built Vite app) ────
     static_dir: Path | None = None
 
     # ── CORS ────────────────────────────────────────────────────
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+
+    # ── Auth (underwriter login) ────────────────────────────────
+    auth_enabled: bool = True
+    auth_username: str = "underwriter"
+    auth_password: str = "forensiq"
+    auth_secret: str = "change-me-in-production-use-a-long-random-string"
+
+    # ── Upload limits ───────────────────────────────────────────
+    max_upload_bytes: int = 25 * 1024 * 1024  # 25 MB per file
+    max_upload_files: int = 20
 
     # ── Risk engine weights (must sum ~1.0) ─────────────────────
     weight_document: float = 0.25
@@ -65,6 +75,8 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     s = Settings()
     s.ensure_dirs()
+    if not s.database_url:
+        s.database_url = f"sqlite:///{s.storage_dir / 'forensiq.db'}"
     return s
 
 

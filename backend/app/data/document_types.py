@@ -1,6 +1,7 @@
 """Document types aligned with Canara Bank underwriting intake."""
 
 CANARA_DOCUMENT_TYPES: list[dict[str, str]] = [
+    {"id": "identity_proof", "label": "PAN / Aadhaar / Identity Proof"},
     {"id": "salary_slip", "label": "Salary Slip / Pay Slip"},
     {"id": "form_16", "label": "Form 16"},
     {"id": "itr", "label": "ITR (Income Tax Return)"},
@@ -20,3 +21,4 @@ DOC_TYPE_IDS = [d["id"] for d in CANARA_DOCUMENT_TYPES]
 INCOME_DOC_TYPES = frozenset({
     "salary_slip", "form_16", "itr", "income_certificate",
 })
+IDENTITY_DOC_TYPES = frozenset({"identity_proof"})

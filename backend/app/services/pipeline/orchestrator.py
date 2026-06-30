@@ -28,6 +28,7 @@ from app.services.risk import engine as risk
 from app.services.verification import engine as verification
 
 CSV_EXT = {".csv", ".txt"}
+_running: set[str] = set()
 
 # Pipeline stages for the progress bar (label + weight toward 100%).
 STAGES = [
@@ -58,6 +59,9 @@ def _is_csv(doc: models.Document) -> bool:
 
 async def run_analysis(application_id: str) -> None:
     """Run the full pipeline; safe to launch as a fire-and-forget task."""
+    if application_id in _running:
+        return
+    _running.add(application_id)
     db: Session = SessionLocal()
     progress = 0
     try:
@@ -243,12 +247,13 @@ async def run_analysis(application_id: str) -> None:
         db.rollback()
         app = db.get(models.Application, application_id)
         if app:
-            app.status = models.ApplicationStatus.analyzed
+            app.status = models.ApplicationStatus.failed
             db.add(models.AuditEvent(
                 application_id=app.id, actor="system", action="analysis_error",
                 detail=str(exc),
             ))
             db.commit()
-        await _emit(application_id, "error", {"message": str(exc)})
+        await _emit(application_id, "error", {"message": str(exc), "progress": progress})
     finally:
+        _running.discard(application_id)
         db.close()

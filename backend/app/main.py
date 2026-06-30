@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.api import applications, cases, dashboard, policy, ws
+from app.api import applications, artifacts, auth, cases, dashboard, policy, ws
 from app.core.config import settings
 from app.core.policy import load_persisted
 from app.db.database import init_db
@@ -42,14 +42,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(applications.router)
 app.include_router(cases.router)
 app.include_router(dashboard.router)
 app.include_router(policy.router)
+app.include_router(artifacts.router)
 app.include_router(ws.router)
 
-# Serve forensic artifacts (ELA heatmaps, copy-move overlays).
-app.mount("/artifacts", StaticFiles(directory=str(settings.artifact_dir)), name="artifacts")
+# Forensic artifacts are served via authenticated /api/artifacts/{filename}.
 
 
 @app.get("/api/health", tags=["meta"])

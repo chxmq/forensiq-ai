@@ -1,6 +1,34 @@
 import axios from "axios";
+import { clearAuth, getToken } from "./auth";
 
 export const api = axios.create({ baseURL: "/api" });
+
+api.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (r) => r,
+  (err) => {
+    if (err.response?.status === 401 && !err.config?.url?.includes("/auth/login")) {
+      clearAuth();
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(err);
+  },
+);
+
+export const login = (username: string, password: string) =>
+  api.post<{ access_token: string; username: string; auth_enabled: boolean }>(
+    "/auth/login",
+    { username, password },
+  ).then((r) => r.data);
 
 // ── Types ────────────────────────────────────────────────────────────
 export type Severity = "low" | "medium" | "high" | "critical";
@@ -47,6 +75,9 @@ export interface CaseOut {
   assignee: string | null;
   summary: string | null;
   resolution_note: string | null;
+  application_id: string;
+  applicant_name: string | null;
+  application_reference: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -114,6 +145,7 @@ export interface DashboardStats {
   auto_cleared: number;
   manual_review: number;
   escalated: number;
+  failed: number;
   open_cases: number;
   avg_risk_score: number;
   fraud_prevented_value: number;

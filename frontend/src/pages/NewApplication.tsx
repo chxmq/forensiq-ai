@@ -35,6 +35,7 @@ export default function NewApplication() {
   const [currentStage, setCurrentStage] = useState("");
   const [liveFindings, setLiveFindings] = useState<PipelineEvent[]>([]);
   const [done, setDone] = useState<PipelineEvent | null>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   const set = (k: string, v: any) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -75,6 +76,7 @@ export default function NewApplication() {
     setProgress(0);
     setLiveFindings([]);
     setDone(null);
+    setAnalysisError(null);
     const ws = openStream(`/ws/applications/${app.id}`, (e) => {
       if (e.type === "started") setStages(e.stages || []);
       if (e.type === "stage") {
@@ -82,6 +84,10 @@ export default function NewApplication() {
         setCurrentStage(e.label || "");
       }
       if (e.type === "finding") setLiveFindings((f) => [e, ...f]);
+      if (e.type === "error") {
+        setAnalysisError(e.message || "Analysis failed.");
+        ws.close();
+      }
       if (e.type === "completed") {
         setProgress(100);
         setDone(e);
@@ -228,6 +234,9 @@ export default function NewApplication() {
                   <div className="h-full rounded-full bg-brand-500 transition-all duration-500" style={{ width: `${progress}%` }} />
                 </div>
                 <p className="mt-2 text-xs text-muted">{done ? "Pipeline finished." : currentStage}</p>
+                {analysisError && (
+                  <p className="mt-2 text-sm text-risk-critical">Analysis failed: {analysisError}</p>
+                )}
 
                 {stages.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">

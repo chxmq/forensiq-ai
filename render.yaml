@@ -11,8 +11,13 @@ services:
         value: production
       - key: FORENSIQ_STATIC_DIR
         value: /app/frontend/dist
-    # Optional: attach a disk for persistent SQLite + uploads between deploys
-    # disk:
-    #   name: forensiq-data
-    #   mountPath: /app/backend/storage
-    #   sizeGB: 1
+      - key: FORENSIQ_AUTH_ENABLED
+        value: "true"
+      - key: FORENSIQ_AUTH_SECRET
+        generateValue: true
+      - key: FORENSIQ_AUTH_PASSWORD
+        generateValue: true
+    disk:
+      name: forensiq-data
+      mountPath: /app/backend/storage
+      sizeGB: 1

@@ -18,20 +18,32 @@ import {
   Sparkles,
   ShieldAlert,
   TrendingUp,
+  Activity,
 } from "lucide-react";
 import { getDashboard, type DashboardStats } from "../lib/api";
 import { inr, riskColor, titleCase } from "../lib/format";
 import { chart, palette, riskColor as riskPalette } from "../lib/theme";
 import { StatCard, StatusPill, Avatar, RiskBar, ScoreRing, Spinner } from "../components/common";
+import { openStream, type PipelineEvent } from "../lib/ws";
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [activity, setActivity] = useState<PipelineEvent[]>([]);
 
   useEffect(() => {
     const load = () => getDashboard().then(setStats).catch(() => {});
     load();
     const t = setInterval(load, 10000);
     return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    const ws = openStream("/ws/activity", (e) => {
+      if (["stage", "finding", "completed", "error", "started"].includes(e.type)) {
+        setActivity((prev) => [e, ...prev].slice(0, 12));
+      }
+    });
+    return () => ws.close();
   }, []);
 
   if (!stats)
@@ -160,6 +172,30 @@ export default function Dashboard() {
               tag="Detection Summary"
               body={`${stats.total_findings} integrity finding(s) across ${stats.total_applications} applications — ${stats.high_severity_findings} require immediate attention.`}
             />
+            {stats.failed > 0 && (
+              <Insight
+                accent={riskPalette.high}
+                tag="Failed Analyses"
+                body={`${stats.failed} application(s) failed during analysis — review logs and re-run.`}
+              />
+            )}
+            {activity.length > 0 && (
+              <div className="rounded-lg border border-line bg-surface p-3">
+                <p className="mb-2 flex items-center gap-1.5 text-label-caps uppercase text-faint">
+                  <Activity className="h-3.5 w-3.5" /> Live pipeline
+                </p>
+                <ul className="max-h-36 space-y-1.5 overflow-y-auto text-xs text-muted">
+                  {activity.map((e, i) => (
+                    <li key={`${e.type}-${i}`}>
+                      <span className="font-semibold text-ink">{e.type}</span>
+                      {e.label ? ` · ${e.label}` : ""}
+                      {e.title ? ` · ${e.title}` : ""}
+                      {e.applicant ? ` · ${e.applicant}` : ""}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -7,8 +7,8 @@ vacant land, agricultural land, a water body or protected forest.
 
 The observations stand in for a satellite land-use classification API
 (built-up ratio, NDVI vegetation index, water ratio, structure count and
-change-detection). The map tiles themselves are rendered live in the frontend
-via OpenStreetMap, centred on the parcel coordinates.
+change-detection). The frontend renders an offline procedural satellite view
+from these metrics (no live map tiles — works fully offline).
 """
 from __future__ import annotations
 
@@ -69,12 +69,40 @@ def analyze_gis(application: dict, extracted_fields: dict) -> ModuleResult:
                 f"Parcel located via {geo.get('source_label') or 'address'}. "
                 "No satellite observation on file for this survey."
             )
+            result.add(Finding(
+                module="gis",
+                code="SATELLITE_OBSERVATION_UNAVAILABLE",
+                title="Satellite land-use observation not on file",
+                detail=(
+                    f"Coordinates resolved ({lat:.4f}, {lng:.4f}) but no bundled "
+                    "satellite classification exists for this survey number. GIS "
+                    "contradiction checks were not performed — manual site verification "
+                    "recommended."
+                ),
+                severity=Severity.medium,
+                confidence=0.7,
+                evidence={"survey_number": survey, "lat": lat, "lng": lng},
+            ))
         else:
             result.summary = (
                 "Could not locate parcel — add property address or upload land title "
                 "with survey/plot number for automatic GIS validation."
             )
+            result.add(Finding(
+                module="gis",
+                code="PARCEL_NOT_LOCATED",
+                title="Property could not be geolocated for satellite check",
+                detail=(
+                    "No coordinates or survey number could be resolved from the "
+                    "application or uploaded land documents. Satellite validation "
+                    "was skipped."
+                ),
+                severity=Severity.medium,
+                confidence=0.75,
+                evidence={"address": application.get("property_address")},
+            ))
         result.metrics["map"] = {"lat": lat, "lng": lng, "zoom": 16} if lat and lng else None
+        result.compute_score()
         return result
 
     claimed = (land.get("property_type") if land else None) or "residential"

@@ -69,6 +69,9 @@ class CaseOut(BaseModel):
     assignee: str | None
     summary: str | None
     resolution_note: str | None
+    application_id: str
+    applicant_name: str | None = None
+    application_reference: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -124,6 +127,7 @@ class DashboardStats(BaseModel):
     auto_cleared: int
     manual_review: int
     escalated: int
+    failed: int = 0
     open_cases: int
     avg_risk_score: float
     fraud_prevented_value: float

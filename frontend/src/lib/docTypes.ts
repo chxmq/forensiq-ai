@@ -1,5 +1,6 @@
 /** Canara Bank document intake types — mirrors backend ``document_types.py``. */
 export const DOC_TYPES: { id: string; label: string }[] = [
+  { id: "identity_proof", label: "PAN / Aadhaar / Identity Proof" },
   { id: "salary_slip", label: "Salary Slip / Pay Slip" },
   { id: "form_16", label: "Form 16" },
   { id: "itr", label: "ITR (Income Tax Return)" },
@@ -21,6 +22,7 @@ export const DOC_TYPE_LABEL: Record<string, string> = Object.fromEntries(
 export function guessDocType(filename: string): string {
   const lower = filename.toLowerCase();
   if (lower.endsWith(".csv") || lower.includes("statement")) return "bank_statement";
+  if (lower.includes("pan") || lower.includes("aadhaar") || lower.includes("aadhar")) return "identity_proof";
   if (lower.includes("form16") || lower.includes("form_16")) return "form_16";
   if (lower.includes("itr")) return "itr";
   if (lower.includes("payslip") || lower.includes("pay_slip") || lower.includes("salary")) return "salary_slip";

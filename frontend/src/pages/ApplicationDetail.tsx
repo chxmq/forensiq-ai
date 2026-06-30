@@ -25,6 +25,7 @@ import {
 import { inrFull, inr, fmtDate, riskColor, riskTint, moduleLabel, titleCase, statusLabel, docTypeLabel } from "../lib/format";
 import { RiskBadge, ScoreRing, SeverityDot, StatusPill, Spinner } from "../components/common";
 import { openStream } from "../lib/ws";
+import { artifactUrl } from "../lib/auth";
 import BenfordChart from "../components/BenfordChart";
 import KnowledgeGraph from "../components/KnowledgeGraph";
 import PropertyMap from "../components/PropertyMap";
@@ -44,6 +45,7 @@ export default function ApplicationDetail() {
   const [tab, setTab] = useState("overview");
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     if (id) getApplication(id).then(setApp).catch(() => {});
@@ -57,8 +59,15 @@ export default function ApplicationDetail() {
     if (!id) return;
     setAnalyzing(true);
     setProgress(0);
+    setAnalysisError(null);
     const ws = openStream(`/ws/applications/${id}`, (e) => {
       if (e.type === "stage") setProgress(e.progress || 0);
+      if (e.type === "error") {
+        setAnalysisError(e.message || "Analysis failed.");
+        ws.close();
+        setAnalyzing(false);
+        load();
+      }
       if (e.type === "completed") {
         setProgress(100);
         setTimeout(() => {
@@ -151,6 +160,11 @@ export default function ApplicationDetail() {
               <div className="h-full bg-brand-500 transition-all" style={{ width: `${progress}%` }} />
             </div>
             <p className="mt-1 text-xs text-muted">Analyzing… {progress}%</p>
+          </div>
+        )}
+        {analysisError && (
+          <div className="mt-4 rounded-lg border border-risk-critical/30 bg-risk-critical/5 px-4 py-3 text-sm text-risk-critical">
+            Analysis failed: {analysisError}
           </div>
         )}
       </div>
@@ -342,7 +356,7 @@ export default function ApplicationDetail() {
                 <div className="mt-4 grid gap-3 sm:grid-cols-3">
                   {Object.entries(artifacts).map(([k, url]) => (
                     <figure key={k} className="overflow-hidden rounded-lg border border-line bg-canvas">
-                      <img src={url as string} alt={k} className="h-40 w-full object-cover" />
+                      <img src={artifactUrl(url as string)} alt={k} className="h-40 w-full object-cover" />
                       <figcaption className="px-2 py-1.5 text-label-caps uppercase text-faint">{k.replace(/_/g, " ")}</figcaption>
                     </figure>
                   ))}

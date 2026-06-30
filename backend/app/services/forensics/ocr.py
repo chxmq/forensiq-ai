@@ -38,10 +38,19 @@ MONTHLY_SALARY_RE = re.compile(
 )
 
 
-def extract_text(path: Path, mime: str) -> str:
+def extract_text(path: Path, mime: str) -> tuple[str, dict[str, Any]]:
+    """Return extracted text and a status dict (ok, engine, warning)."""
     if mime == "application/pdf" or path.suffix.lower() == ".pdf":
-        return _pdf_text(path)
+        text = _pdf_text(path)
+        if not text:
+            return "", {"ok": False, "engine": "pypdf", "warning": "No extractable text in PDF."}
+        return text, {"ok": True, "engine": "pypdf", "warning": None}
     return _image_text(path)
+
+
+def extract_text_legacy(path: Path, mime: str) -> str:
+    text, _ = extract_text(path, mime)
+    return text
 
 
 def _pdf_text(path: Path) -> str:
@@ -56,14 +65,28 @@ def _pdf_text(path: Path) -> str:
     return text.strip()
 
 
-def _image_text(path: Path) -> str:
+def _image_text(path: Path) -> tuple[str, dict[str, Any]]:
     try:
         import pytesseract
         from PIL import Image
 
-        return pytesseract.image_to_string(Image.open(path)).strip()
-    except Exception:  # noqa: BLE001
-        return ""
+        text = pytesseract.image_to_string(Image.open(path)).strip()
+        if not text:
+            return "", {
+                "ok": False,
+                "engine": "tesseract",
+                "warning": "OCR returned no text — image may be blank or unreadable.",
+            }
+        return text, {"ok": True, "engine": "tesseract", "warning": None}
+    except Exception as exc:  # noqa: BLE001
+        return "", {
+            "ok": False,
+            "engine": "tesseract",
+            "warning": (
+                f"OCR unavailable or failed ({exc}). Install Tesseract OCR and ensure "
+                "it is on PATH for image document analysis."
+            ),
+        }
 
 
 def _to_float(raw: str) -> float:

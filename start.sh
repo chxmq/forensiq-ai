@@ -18,9 +18,9 @@ if [ ! -d ".venv" ]; then
   ./.venv/bin/python -m pip install -r requirements.txt
 fi
 
-# 2. Seed demo data (idempotent — resets the demo database)
-echo "• Seeding demo applications & sample documents..."
-./.venv/bin/python -m scripts.seed >/dev/null
+# 2. Bootstrap demo data (only seeds when database is empty)
+echo "• Bootstrapping database (seed only if empty)..."
+./.venv/bin/python -m scripts.bootstrap >/dev/null
 
 # 3. Launch backend
 echo "• Starting backend on http://127.0.0.1:8000"

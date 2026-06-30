@@ -404,7 +404,21 @@ def analyze_financials(
     result = ModuleResult(module="financial")
     if not txns:
         result.status = "skipped"
-        result.summary = "No transaction data available for financial analysis."
+        result.add(Finding(
+            module="financial",
+            code="NO_BANK_STATEMENT_DATA",
+            title="Bank statement not available for financial analysis",
+            detail=(
+                "No transaction data was parsed from uploaded files. Upload a CSV bank "
+                "statement to verify declared income against salary credits, Benford "
+                "distribution, and anomalous transactions."
+            ),
+            severity=Severity.high if declared_income > 0 else Severity.medium,
+            confidence=0.92,
+            evidence={"declared_income": declared_income},
+        ))
+        result.compute_score()
+        result.summary = "Financial analysis skipped — no bank statement transactions."
         return result
 
     amounts = [abs(float(t.get("amount", 0) or 0)) for t in txns if t.get("amount")]

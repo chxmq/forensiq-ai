@@ -17,8 +17,18 @@ from app.db import models
 
 def _case_number(db: Session) -> str:
     year = datetime.now(timezone.utc).year
-    count = db.query(models.Case).count() + 1
-    return f"FRQ-{year}-{count:05d}"
+    prefix = f"FRQ-{year}-"
+    latest = (
+        db.query(models.Case.case_number)
+        .filter(models.Case.case_number.like(f"{prefix}%"))
+        .order_by(models.Case.case_number.desc())
+        .first()
+    )
+    if latest:
+        seq = int(latest[0].rsplit("-", 1)[-1]) + 1
+    else:
+        seq = 1
+    return f"{prefix}{seq:05d}"
 
 
 def apply_policy(db: Session, app: models.Application, report: dict) -> dict:
