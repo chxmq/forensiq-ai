@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api import applications, cases, dashboard, policy, ws
@@ -35,7 +36,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?|https://.*\.(onrender\.com|railway\.app|fly\.dev)",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -59,3 +60,29 @@ def health() -> dict:
         "version": settings.app_version,
         "environment": settings.environment,
     }
+
+
+# Production: serve the built React app from the same origin (API + WS + UI).
+_static = settings.static_dir
+if _static and _static.exists():
+    _assets = _static / "assets"
+    if _assets.is_dir():
+        app.mount("/assets", StaticFiles(directory=str(_assets)), name="assets")
+
+    @app.get("/favicon.svg", include_in_schema=False)
+    async def favicon() -> FileResponse:
+        return FileResponse(_static / "favicon.svg")
+
+    @app.get("/icons.svg", include_in_schema=False)
+    async def icons() -> FileResponse:
+        return FileResponse(_static / "icons.svg")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa(full_path: str) -> FileResponse:
+        if full_path.startswith(("api/", "artifacts/", "ws/")):
+            from fastapi import HTTPException
+            raise HTTPException(404)
+        candidate = _static / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(_static / "index.html")

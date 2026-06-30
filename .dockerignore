@@ -1,0 +1,15 @@
+**/.git
+**/.venv
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/.DS_Store
+frontend/dist
+backend/forensiq.db
+backend/storage/uploads/*
+backend/storage/artifacts/*
+!backend/storage/uploads/.gitkeep
+!backend/storage/artifacts/.gitkeep
+stitch_*/
+*.log
+.env

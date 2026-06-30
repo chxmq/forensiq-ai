@@ -63,7 +63,45 @@ the requirement that the solution execute without any internet access.
 
 ---
 
-## Quick start
+## Deploy (production)
+
+Forensiq AI ships as a **single Docker image** — FastAPI serves the API, WebSockets,
+forensic artifacts, and the built React UI on one URL.
+
+### Option A — Render (recommended, free tier)
+
+1. Push this repo to GitHub ([chxmq/forensiq-ai](https://github.com/chxmq/forensiq-ai)).
+2. Open [Render Dashboard](https://dashboard.render.com) → **New** → **Blueprint**.
+3. Connect the `forensiq-ai` repository — Render reads `render.yaml` automatically.
+4. Wait ~5–8 minutes for the Docker build (OpenCV + Tesseract + frontend build).
+5. Your live URL will be `https://forensiq-ai.onrender.com` (or similar).
+
+On first boot the container seeds five demo applications automatically.
+
+> **Note:** On Render’s free tier the app sleeps after inactivity (~50s cold start).
+> Uploaded data is ephemeral unless you attach a persistent disk in `render.yaml`.
+
+### Option B — Docker anywhere
+
+```bash
+docker build -t forensiq-ai .
+docker run -p 8000:8000 forensiq-ai
+# → http://localhost:8000
+```
+
+Requires Docker with ~2 GB RAM for the image build.
+
+### Environment variables
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `PORT` | `8000` | HTTP port (set by Render/Railway automatically) |
+| `FORENSIQ_ENVIRONMENT` | `development` | Set to `production` in deploy |
+| `FORENSIQ_STATIC_DIR` | — | Path to `frontend/dist` (set in Dockerfile) |
+
+---
+
+## Quick start (local)
 
 **Prerequisites:** Python 3.13, Node 18+, and Tesseract (`brew install tesseract`).
 Only needed once for setup (installing packages); the app itself runs offline.

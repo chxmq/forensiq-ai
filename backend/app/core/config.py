@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     # ── Database ────────────────────────────────────────────────
     database_url: str = f"sqlite:///{BACKEND_DIR / 'forensiq.db'}"
 
+    # ── Frontend (production: FastAPI serves built Vite app) ────
+    static_dir: Path | None = None
+
     # ── CORS ────────────────────────────────────────────────────
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
