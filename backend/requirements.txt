@@ -1,0 +1,29 @@
+# ── Web framework ──────────────────────────────────────────────
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+websockets==14.1
+
+# ── Data validation / settings ─────────────────────────────────
+pydantic==2.10.4
+pydantic-settings==2.7.1
+
+# ── Persistence ────────────────────────────────────────────────
+SQLAlchemy==2.0.36
+
+# ── Scientific / imaging ───────────────────────────────────────
+numpy==2.2.1
+scipy==1.15.0
+Pillow==11.1.0
+opencv-python-headless==4.11.0.86
+scikit-image==0.25.0
+scikit-learn==1.6.1
+
+# ── Document parsing / forensics ───────────────────────────────
+pytesseract==0.3.13
+pypdf==5.1.0
+pikepdf==9.5.2
+reportlab==4.2.5
+
+# ── Utilities ──────────────────────────────────────────────────
+python-dateutil==2.9.0.post0

@@ -1,0 +1,9 @@
+{
+  "records": [
+    {"pan": "ABCPS1234K", "name": "Ramesh Kumar Sharma", "status": "active", "reported_annual_income": 1500000.0},
+    {"pan": "AXTPR5521M", "name": "Lakshmi Narayan Reddy", "status": "active", "reported_annual_income": 600000.0},
+    {"pan": "BNZPA9087Q", "name": "Anita Desai", "status": "active", "reported_annual_income": 4200000.0},
+    {"pan": "CDEPK7766L", "name": "Mohammed Irfan Khan", "status": "active", "reported_annual_income": 1800000.0},
+    {"pan": "ZZZPX0000Z", "name": "UNKNOWN", "status": "not_found", "reported_annual_income": 0.0}
+  ]
+}

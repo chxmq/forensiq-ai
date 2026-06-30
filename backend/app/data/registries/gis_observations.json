@@ -1,0 +1,10 @@
+{
+  "_comment": "Stand-in for a satellite/GIS land-use classification API. Each record is the independent remote-sensing observation for a parcel: built_up_ratio (fraction of impervious/structure pixels), ndvi (vegetation index 0-1), water_ratio, and a derived observed_land_use class plus change-detection vs prior imagery.",
+  "records": [
+    {"survey_number": "142/3", "observed_land_use": "residential", "built_up_ratio": 0.71, "ndvi": 0.21, "water_ratio": 0.0, "structures_detected": 3, "change_since_prior": "stable", "imagery_date": "2026-04-18"},
+    {"survey_number": "88/1", "observed_land_use": "agricultural", "built_up_ratio": 0.04, "ndvi": 0.68, "water_ratio": 0.03, "structures_detected": 0, "change_since_prior": "stable", "imagery_date": "2026-04-12"},
+    {"survey_number": "305/2B", "observed_land_use": "commercial", "built_up_ratio": 0.83, "ndvi": 0.08, "water_ratio": 0.0, "structures_detected": 1, "change_since_prior": "stable", "imagery_date": "2026-05-02"},
+    {"survey_number": "47", "observed_land_use": "forest", "built_up_ratio": 0.01, "ndvi": 0.82, "water_ratio": 0.05, "structures_detected": 0, "change_since_prior": "stable", "imagery_date": "2026-03-30"},
+    {"survey_number": "210/5", "observed_land_use": "vacant", "built_up_ratio": 0.05, "ndvi": 0.34, "water_ratio": 0.0, "structures_detected": 0, "change_since_prior": "new_clearing", "imagery_date": "2026-05-20"}
+  ]
+}

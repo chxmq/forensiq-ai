@@ -1,0 +1,81 @@
+{
+  "records": [
+    {
+      "survey_number": "142/3",
+      "owner_name": "Ramesh Kumar Sharma",
+      "owner_pan": "ABCPS1234K",
+      "property_type": "residential",
+      "land_use": "residential",
+      "area_value": 1200.0,
+      "area_unit": "sqft",
+      "registered_value": 4500000.0,
+      "address": "Plot 142/3, Whitefield, Bengaluru, Karnataka 560066",
+      "lat": 12.9698,
+      "lng": 77.7499,
+      "encumbrance": "none",
+      "registration_date": "2019-03-12"
+    },
+    {
+      "survey_number": "88/1",
+      "owner_name": "Lakshmi Narayan Reddy",
+      "owner_pan": "AXTPR5521M",
+      "property_type": "agricultural",
+      "land_use": "agricultural",
+      "area_value": 2.5,
+      "area_unit": "acre",
+      "registered_value": 3200000.0,
+      "address": "Survey 88/1, Devanahalli, Bengaluru Rural, Karnataka 562110",
+      "lat": 13.2437,
+      "lng": 77.7115,
+      "encumbrance": "mortgage_active",
+      "encumbrance_detail": "Mortgage registered to Sundaram Finance, 2022-08-01, outstanding ₹18,00,000",
+      "registration_date": "2017-11-05"
+    },
+    {
+      "survey_number": "305/2B",
+      "owner_name": "Anita Desai",
+      "owner_pan": "BNZPA9087Q",
+      "property_type": "commercial",
+      "land_use": "commercial",
+      "area_value": 3400.0,
+      "area_unit": "sqft",
+      "registered_value": 22000000.0,
+      "address": "305/2B, MG Road, Pune, Maharashtra 411001",
+      "lat": 18.5167,
+      "lng": 73.8784,
+      "encumbrance": "none",
+      "registration_date": "2021-06-20"
+    },
+    {
+      "survey_number": "47",
+      "owner_name": "Government of Karnataka (Reserved Forest)",
+      "owner_pan": null,
+      "property_type": "protected",
+      "land_use": "forest_reserved",
+      "area_value": 12.0,
+      "area_unit": "acre",
+      "registered_value": 0.0,
+      "address": "Survey 47, Bannerghatta Reserved Area, Karnataka",
+      "lat": 12.8003,
+      "lng": 77.5772,
+      "encumbrance": "non_transferable",
+      "registration_date": "1998-01-01"
+    },
+    {
+      "survey_number": "210/5",
+      "owner_name": "Mohammed Irfan Khan",
+      "owner_pan": "CDEPK7766L",
+      "property_type": "residential",
+      "land_use": "vacant_plot",
+      "area_value": 1800.0,
+      "area_unit": "sqft",
+      "registered_value": 6800000.0,
+      "address": "210/5, Gachibowli, Hyderabad, Telangana 500032",
+      "lat": 17.4401,
+      "lng": 78.3489,
+      "encumbrance": "none",
+      "registration_date": "2023-02-14",
+      "litigation": "Title dispute pending — CS 442/2024, Ranga Reddy District Court"
+    }
+  ]
+}

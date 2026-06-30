@@ -1,0 +1,78 @@
+/* Local fonts — fully offline (no CDN). */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/inter/800.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply text-ink antialiased;
+  font-feature-settings: "cv11", "ss01", "tnum";
+  /* Warm paper base + subtle offline grain (inline SVG, no external assets). */
+  background-color: #f4f3ee;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  @apply rounded-full;
+  background-color: #e6e3da;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-line bg-surface shadow-card;
+  }
+  .card-pad {
+    @apply p-5;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-navy-900 text-white hover:bg-navy-800;
+  }
+  .btn-secondary {
+    @apply btn border border-line bg-surface text-ink hover:bg-canvas;
+  }
+  .btn-ghost {
+    @apply btn text-muted hover:bg-canvas hover:text-ink;
+  }
+  .btn-danger {
+    @apply btn bg-risk-critical text-white hover:brightness-95;
+  }
+  .btn-success {
+    @apply btn bg-risk-low text-white hover:brightness-95;
+  }
+  .label {
+    @apply text-label-caps uppercase text-faint;
+  }
+  .input {
+    @apply w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-faint focus:border-brand-500 focus:shadow-ring;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold;
+  }
+  .th {
+    @apply px-4 py-3 text-label-caps uppercase text-faint;
+  }
+}
