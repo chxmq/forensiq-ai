@@ -1,87 +1,157 @@
-# Forensiq AI — Intelligent Document Integrity System
+# Forensiq AI
 
-**Real-time anomaly detection for underwriting.** Forensiq AI is an intelligent
-verification layer that sits inside the loan-underwriting workflow and answers a
-question that point fraud checks cannot: *is the entire legal, financial and
-ownership story behind this application genuine, consistent and trustworthy
-across independent sources?*
+**Catch loan fraud that single-document checks miss.**
 
-Instead of validating each document in isolation, Forensiq AI performs forensic
-analysis on uploaded documents **and** cross-verifies the extracted information
-against trusted registries, transaction behaviour and satellite imagery — then
-produces an **explainable** underwriting decision with supporting evidence and
-risk reasoning, in real time.
+Forensiq AI is a prototype underwriting intelligence layer for Canara Bank's **SuRaksha Cyber Hackathon 2.0** (Theme 1: real-time anomaly detection). It reads the documents a borrower submits, checks them against registries, bank activity, and satellite land-use data, then shows **where the story breaks** with evidence you can defend in an audit.
 
----
+**Live demo:** [forensiq-ai.onrender.com](https://forensiq-ai.onrender.com)
 
-## Why this is different
+## Screenshots
 
-Most existing systems stop at OCR extraction or a single fraud score. Forensiq
-AI detects **contradictions across sources** that are nearly impossible to catch
-manually, for example:
+**Dashboard** — portfolio risk, contradiction counts, and applications needing attention.
 
-- A title deed claims a **residential building**, but satellite imagery shows
-  **vacant land** and the land registry lists a **different owner**.
-- A financial statement declares **high revenue**, but the actual transaction
-  activity (and tax records) **do not support that income**.
-- A "final" PDF statement was **silently edited after issuance**, or an image
-  document had a **value overwritten** after it was scanned.
+![Forensiq AI dashboard](docs/screenshots/dashboard.png)
 
-Every alert is **explainable**: it traces back to specific findings, confidence
-scores and visual evidence — not an opaque number.
+**Applications** — filter and open any demo case.
 
----
+![Applications list](docs/screenshots/applications.png)
 
-## The six modules
+**Executive Summary** — risk narrative, module scores, and the consistency knowledge graph on a fraud case (Suresh Sharma).
 
-| Module | What it actually does | Techniques |
-|---|---|---|
-| **Document Forensics** | Detects tampering, edited values, pasted content and metadata manipulation in images & PDFs | Noise-floor anomaly detection, Error-Level Analysis (ELA), EXIF/metadata fingerprinting, PDF incremental-update & producer analysis, Tesseract OCR + field extraction |
-| **Financial Integrity** | Flags fabricated/edited statements and income inconsistencies | Benford's Law (χ² goodness-of-fit), Isolation Forest anomaly detection, declared-vs-observed income reconciliation, synthetic-pattern detection (round numbers, repeats, regular timing) |
-| **Cross-Source Verification** | Reconciles the application narrative against trusted registries and builds a contradiction knowledge graph | Identity/PAN matching, ownership reconciliation, encumbrance/litigation checks, value & area cross-checks |
-| **GIS / Satellite Validation** | Confirms the collateral physically exists and matches the claimed land use | Remote-sensing land-use comparison (built-up ratio, NDVI, structure count), change detection, offline data-driven land-use render |
-| **Explainable Risk Intelligence** | Fuses all module scores into one defensible decision with natural-language reasoning | Weighted, saturating risk model with critical-finding floor + contradiction summary |
-| **Automated Risk Escalation** | Clears, reviews or auto-escalates and opens investigation cases | Policy engine, case management, full audit trail |
+![Application overview with knowledge graph](docs/screenshots/application-overview.png)
+
+**Document Analysis** — forensic artifacts including original document vs Error-Level Analysis (ELA).
+
+![Document forensics and ELA evidence](docs/screenshots/forensics-ela.png)
+
+**Financial Analysis** — Benford distribution and income vs bank inflow.
+
+![Financial integrity analysis](docs/screenshots/financial.png)
+
+**Cross-Source** — registry reconciliation and contradiction findings.
+
+![Cross-source verification](docs/screenshots/cross-source.png)
 
 ---
 
-## Tech stack
+## Try it in two minutes
 
-- **Backend** — Python 3.13, FastAPI, SQLAlchemy (SQLite), WebSockets, OpenCV,
-  scikit-image, scikit-learn, NumPy/SciPy, Pillow, pikepdf/pypdf, Tesseract OCR.
-- **Frontend** — React + TypeScript, Vite, Tailwind CSS, Recharts, system fonts,
-  Lucide icons (all bundled — no CDNs).
-- **Real-time** — WebSocket streaming of pipeline stages and live detection
-  signals.
+1. Open the [live app](https://forensiq-ai.onrender.com) (or run locally with `./start.sh`).
+2. Go to **Applications**.
+3. Open **Suresh Sharma** to see a finished fraud case, or **Lakshmi Narayan Reddy** and click **Run Forensiq Analysis** to watch the pipeline live.
+4. On the application page, check:
+   - **Overview** — risk score, narrative, and the **Consistency Knowledge Graph** (red edges = sources disagree).
+   - **Forensics** — **Original** vs **Error-Level Analysis (ELA)** side by side on tampered images.
+   - **Financial** — Benford chart and income vs bank inflow.
+   - **GIS** — claimed land use vs what satellite-style analysis shows.
 
-### Offline by design
-
-Forensiq AI runs **100% offline** — no external LLMs, no cloud APIs, no CDN
-fonts and no live map tiles. All ML/forensics run locally; the GIS module uses a
-data-driven satellite land-use render instead of online imagery. This satisfies
-the requirement that the solution execute without any internet access.
+On first deploy, five demo applications are seeded automatically. Four are already analyzed; one is left for a live run.
 
 ---
 
-## Deploy (production)
+## The problem we solve
 
-Forensiq AI ships as a **single Docker image** — FastAPI serves the API, WebSockets,
-forensic artifacts, and the built React UI on one URL.
+Underwriters get a stack of PDFs and scans. Each file can look fine on its own. Fraud shows up when you compare them:
 
-### Option A — Render (recommended, free tier)
+| What the borrower says | What another source says |
+|------------------------|--------------------------|
+| "I own this property" | Land registry lists a different owner |
+| "Residential building" | Satellite analysis shows vacant land |
+| "₹12L annual income" | Bank credits do not support it |
+| "Original title deed" | ELA shows a pasted-over value region |
 
-1. Push this repo to GitHub ([chxmq/forensiq-ai](https://github.com/chxmq/forensiq-ai)).
-2. Open [Render Dashboard](https://dashboard.render.com) → **New** → **Blueprint**.
-3. Connect the `forensiq-ai` repository — Render reads `render.yaml` automatically.
-4. Wait ~5–8 minutes for the Docker build (OpenCV + Tesseract + frontend build).
-5. Your live URL will be `https://forensiq-ai.onrender.com` (or similar).
+Forensiq AI automates that cross-check and surfaces contradictions with confidence scores and artifacts, not a black-box number.
 
-On first boot the container seeds five demo applications automatically.
+---
 
-> **Note:** On Render’s free tier the app sleeps after inactivity (~50s cold start).
-> Uploaded data is ephemeral unless you attach a persistent disk in `render.yaml`.
+## Demo scenarios
 
-### Option B — Docker anywhere
+| Applicant | What is wrong | Expected result |
+|-----------|---------------|-----------------|
+| Ramesh Kumar Sharma | Clean, consistent pack | Low risk, auto-clear |
+| Suresh Sharma | Forged deed, owner mismatch, fabricated statement | Critical, escalated |
+| Anita Desai | Tampered income cert, Benford violation | High, manual review |
+| Mohammed Irfan Khan | Vacant land vs "residential", active litigation | Critical, escalated |
+| Lakshmi Narayan Reddy | Encumbered agricultural land | Run analysis live |
+
+Sample files live under `backend/app/data/samples/` if you want to upload your own application.
+
+---
+
+## What is under the hood
+
+Six modules run in sequence when you click **Analyze**:
+
+1. **Document forensics** — tampering on images and PDFs (noise-floor analysis, ELA heatmaps, metadata checks, OCR field extraction).
+2. **Financial integrity** — Benford's Law on amounts, Isolation Forest on transactions, declared income vs bank inflow.
+3. **Cross-source verification** — PAN, ownership, encumbrance, value and area vs mock land and identity registries.
+4. **GIS / satellite** — claimed use vs observed built-up / vegetation from offline observation data.
+5. **Risk intelligence** — weighted score, plain-English narrative, contradiction list, unified knowledge graph.
+6. **Escalation** — auto-clear, manual review, or open a fraud case with audit trail.
+
+Progress streams over WebSockets so the UI updates stage by stage.
+
+---
+
+## What is real vs simulated
+
+**Real (runs locally, no LLM):**
+
+- Error-Level Analysis and noise-floor detection on images
+- PDF structural checks (incremental updates, producer metadata)
+- Tesseract OCR and regex field extraction
+- Benford's Law and Isolation Forest on transaction CSVs
+- Rule-based cross-source reconciliation and risk scoring
+
+**Simulated for the hackathon prototype:**
+
+- Land registry, identity registry, and GIS observations (`backend/app/data/registries/`)
+- Geocoding uses bundled pincode centroids, not a live maps API
+
+The integration points are the same shape as production: swap the JSON registries for CERSAI, state land records, or Bhuvan when APIs are available.
+
+**No large language model** is used. Explanations come from structured findings and templates.
+
+---
+
+## Run locally
+
+**You need:** Python 3.13, Node 18+, Tesseract (`brew install tesseract` on macOS).
+
+```bash
+git clone https://github.com/chxmq/forensiq-ai.git
+cd forensiq-ai
+./start.sh
+```
+
+Then open:
+
+- App: **http://localhost:5173**
+- API docs: **http://127.0.0.1:8000/docs**
+
+`start.sh` creates the virtualenv, installs dependencies, seeds demo data, and starts backend + frontend.
+
+### Manual start
+
+```bash
+# Terminal 1 — backend
+cd backend
+python3.13 -m venv .venv
+./.venv/bin/pip install -r requirements.txt
+./.venv/bin/python -m scripts.seed
+./.venv/bin/python -m uvicorn app.main:app --reload
+
+# Terminal 2 — frontend
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## Deploy
+
+Single Docker image: API, WebSockets, artifacts, and the React UI on one port.
 
 ```bash
 docker build -t forensiq-ai .
@@ -89,131 +159,46 @@ docker run -p 8000:8000 forensiq-ai
 # → http://localhost:8000
 ```
 
-Requires Docker with ~2 GB RAM for the image build.
-
-### Environment variables
+**Render (current production):** connect the GitHub repo; `render.yaml` defines the service. Free tier sleeps after idle (~50s wake). Data is ephemeral unless you add a persistent disk.
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `PORT` | `8000` | HTTP port (set by Render/Railway automatically) |
-| `FORENSIQ_ENVIRONMENT` | `development` | Set to `production` in deploy |
-| `FORENSIQ_STATIC_DIR` | — | Path to `frontend/dist` (set in Dockerfile) |
+| `PORT` | `8000` | HTTP port |
+| `FORENSIQ_ENVIRONMENT` | `development` | Set `production` when deployed |
+| `FORENSIQ_STATIC_DIR` | set in Dockerfile | Built frontend assets |
+
+Tunable weights and thresholds: `backend/app/core/config.py` (env prefix `FORENSIQ_`).
 
 ---
 
-## Quick start (local)
+## Project layout
 
-**Prerequisites:** Python 3.13, Node 18+, and Tesseract (`brew install tesseract`).
-Only needed once for setup (installing packages); the app itself runs offline.
-
-```bash
-./start.sh
 ```
-
-This creates the Python environment, installs dependencies, seeds demo data,
-and launches both servers:
-
-- Frontend → **http://localhost:5173**
-- API docs → **http://127.0.0.1:8000/docs**
-
-### Manual run
-
-```bash
-# Backend
-cd backend
-python3.13 -m venv .venv && ./.venv/bin/pip install -r requirements.txt
-./.venv/bin/python -m scripts.seed          # generate samples + demo data
-./.venv/bin/python -m uvicorn app.main:app --reload
-
-# Frontend (new terminal)
-cd frontend
-npm install && npm run dev
+backend/app/
+  api/              REST + WebSocket routes
+  services/
+    forensics/      image & PDF analysis, OCR
+    financial/      Benford, Isolation Forest, income checks
+    verification/   registry cross-checks
+    gis/            land-use validation
+    risk/           scoring + consistency knowledge graph
+    pipeline/       analysis orchestrator
+  data/             mock registries + sample documents
+frontend/src/
+  pages/            dashboard, applications, cases, settings
+  components/       knowledge graph, maps, charts
 ```
 
 ---
 
-## Demo walkthrough
+## Offline requirement
 
-The seed creates five realistic scenarios (the last is left **un-analyzed** so
-you can run it live from the UI):
-
-| Application | Scenario | Expected outcome |
-|---|---|---|
-| Ramesh Kumar Sharma | Clean application, consistent across all sources | **LOW** → auto-cleared |
-| Suresh Sharma | Forged title (overwritten value) + ownership theft + fabricated statement | **CRITICAL** → escalated |
-| Anita Desai | Tampered income certificate + Benford violation + income overstatement | **HIGH** → manual review |
-| Mohammed Irfan Khan | "Residential" property that satellite shows as **vacant land** + active litigation | **CRITICAL** → escalated |
-| Lakshmi Narayan Reddy | Encumbered agricultural collateral *(left for a live demo run)* | run it live |
-
-**Suggested live demo:** open the un-analyzed application (or create a new one),
-upload `backend/app/data/samples/*`, click **Run Forensiq Analysis**, and watch
-the pipeline stream stages and findings in real time, ending in an explainable
-report with forensic heatmaps, a Benford chart, the contradiction knowledge
-graph, and a satellite view.
+The app is built to run **without internet** after install: no external LLMs, no CDN assets, no live map tiles. Forensics and ML run on the server; GIS uses bundled observation data instead of streaming satellite tiles.
 
 ---
 
-## How the forensics actually work (no smoke and mirrors)
+## License and context
 
-- **Noise-floor anomaly** — genuine scans carry spatially-uniform sensor noise.
-  A region pasted/typed in an editor has a collapsed noise floor; we locate it
-  with a sliding-window noise-std map and connected-component analysis, and draw
-  the bounding box on the evidence overlay.
-- **Benford's Law** — first digits of organic financial figures follow a
-  logarithmic distribution; fabricated statements fail a χ² test (critical
-  15.51, 8 dof).
-- **Isolation Forest** — unsupervised outlier detection over transaction
-  features surfaces injected/anomalous transactions.
-- **PDF structural forensics** — counts `%%EOF`/xref sections to detect
-  incremental updates (edits after a "final"/signed PDF) and inspects the
-  producer/creator metadata.
+Built for **SuRaksha Cyber Hackathon 2.0**, Canara Bank, Theme 1 — intelligent verification during loan underwriting.
 
-The mock registries (`backend/app/data/registries/`) stand in for live land,
-identity and GIS APIs — the verification logic is exactly what would run against
-the real sources.
-
-### Resilience to the "scanned hard copy" problem
-
-A printed-then-rescanned document can erase digital tamper signatures (the whole
-page picks up uniform scan noise). Forensiq AI is deliberately **multi-layered**
-so it does not depend on document forensics alone: even when a forgery survives
-the pixel-level checks, the **cross-source verification, financial-integrity and
-GIS modules** still expose the fraud — because a forger cannot also rewrite the
-land registry, the tax record, the transaction history and the satellite imagery
-to stay mutually consistent. Document forensics narrows it down; cross-source
-contradiction is what makes the verdict robust.
-
----
-
-## Project structure
-
-```
-backend/
-  app/
-    api/            REST + WebSocket routes
-    core/           configuration & tunable thresholds
-    db/             SQLAlchemy models
-    services/
-      forensics/    image & PDF forensics + OCR
-      financial/    Benford, Isolation Forest, consistency
-      verification/ registries + contradiction engine + knowledge graph
-      gis/          satellite land-use validation
-      risk/         explainable aggregation
-      escalation/   policy + case management
-      pipeline/     orchestrator + WebSocket manager
-    data/           mock registries & generated samples
-  scripts/          sample generator + seeder
-frontend/
-  src/
-    components/     UI + charts + map + knowledge graph
-    pages/          dashboard, applications, detail, new (live), cases
-    lib/            API client, websocket, formatting
-```
-
----
-
-## Configuration
-
-All weights and thresholds are centralised and environment-overridable in
-`backend/app/core/config.py` (prefix `FORENSIQ_`), e.g. module weights, the
-approve/review/escalate risk thresholds, and each detector's sensitivity.
+Repository: [github.com/chxmq/forensiq-ai](https://github.com/chxmq/forensiq-ai)
